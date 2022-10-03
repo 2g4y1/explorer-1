@@ -13,6 +13,8 @@ import { routes } from "./routes";
 import { subscribe } from "./routes/feed/subscribe";
 import { unsubscribe } from "./routes/feed/unsubscribe";
 import { cors, executeRoute, matchRouteUrl } from "./utils/apiHelper";
+const path = require('path');
+const fs = require('fs');
 
 const configId = process.env.CONFIG_ID || "local";
 const config: IConfiguration = require(`./data/config.${configId}.json`);
@@ -43,6 +45,31 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
 app.use(compression());
+
+app.get('/networks', function(request, response) {
+    const filePath = path.resolve(__dirname, "../../client/public/",  "index.html");
+
+    // read in the index.html file
+    fs.readFile(filePath, "utf8", function (err, data) {
+        if (err) {
+            return console.log(err);
+        }
+        
+        // replace the special strings with server generated strings
+        data = data.replace(/\$TITLE/g, "IOTA Tangle Explorer");
+        data = data.replace(/\$NAME/g, "IOTA Tangle Explorer");
+        const result = data.replace(/\$MOBILE_TITLE/g, "IOTA Tangle Explorer");
+        console.log("result", result);
+        response.send(result);
+    });
+});
+
+app.use(express.static(path.resolve(__dirname, "../../client/build",  "index.html")));
+
+app.get('*', function(request, response) {
+    const filePath = path.resolve(__dirname, "../../client/build", 'index.html');
+    response.sendFile(filePath);
+});
 
 app.use((req, res, next) => {
     let allowedDomains = configAllowedDomains;
