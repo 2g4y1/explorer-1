@@ -3,6 +3,7 @@ import { CONFLICT_REASON_STRINGS, ConflictReason } from "@iota/iota.js-stardust"
 import { Converter } from "@iota/util.js-stardust";
 import classNames from "classnames";
 import React, { useContext, useRef, useState } from "react";
+import CytoscapeComponent from "react-cytoscapejs";
 import { Link, RouteComponentProps } from "react-router-dom";
 import { ReactComponent as CloseIcon } from "../../../assets/close.svg";
 import { DateHelper } from "../../../helpers/dateHelper";
@@ -84,16 +85,26 @@ export const Visualizer: React.FC<RouteComponentProps<VisualizerRouteProps>> = (
                     </div>
                 </div>
             </div>
+
+            <CytoscapeComponent
+                style={{ height: 500, width: 1000 }} elements={[
+                { data: { id: "one", label: "Node 1" }, position: { x: 100, y: 400 } },
+                { data: { id: "two", label: "Node 2" }, position: { x: 150, y: 300 } },
+                { data: { source: "one", target: "two", label: "Edge from Node1 to Node2" } }
+            ]}
+            />
             <div className="graph-border">
-                <div
-                    className="viva"
-                    onClick={() => {
-                        if (lastClick && Date.now() - lastClick > 300) {
-                            selectNode();
-                        }
-                    }}
-                    ref={graphElement}
-                />
+
+                {/* <div*/}
+                {/*    className="viva"*/}
+                {/*    onClick={() => {*/}
+                {/*        if (lastClick && Date.now() - lastClick > 300) {*/}
+                {/*            selectNode();*/}
+                {/*        }*/}
+                {/*    }}*/}
+                {/*    ref={graphElement}*/}
+                {/* />*/}
+
                 <div className="action-panel-container">
                     <div className="card">
                         <button className="pause-button" type="button" onClick={() => toggleActivity()}>
