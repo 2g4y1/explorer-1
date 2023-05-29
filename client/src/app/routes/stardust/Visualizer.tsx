@@ -2,14 +2,14 @@
 import { CONFLICT_REASON_STRINGS, ConflictReason } from "@iota/iota.js-stardust";
 import { Converter } from "@iota/util.js-stardust";
 import classNames from "classnames";
-import React, { useMemo, useContext, useRef, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { Link, RouteComponentProps } from "react-router-dom";
 import { ReactComponent as CloseIcon } from "../../../assets/close.svg";
 import { DateHelper } from "../../../helpers/dateHelper";
 import { useNetworkConfig } from "../../../helpers/hooks/useNetworkConfig";
 import { useNetworkStats } from "../../../helpers/hooks/useNetworkStats";
-import { useVisualizerState } from "../../../helpers/hooks/useVisualizerState";
 import { formatAmount } from "../../../helpers/stardust/valueFormatHelper";
+import { Cytoscape } from "../../../visualizerpoc/cytoscape/Cytoscape.component";
 import { useVisualizerViva } from "../../../visualizerpoc/vivagraph-layout/useVisualizerViva";
 import { useVisualizerStateVivaWithAncorsPoc } from "../../../visualizerpoc/vivagraph-withancorpoints/useVisualizerState";
 import Modal from "../../components/Modal";
@@ -20,7 +20,6 @@ import { VisualizerRouteProps } from "../VisualizerRouteProps";
 import { ReactComponent as DropdownIcon } from "./../../../assets/dropdown-arrow.svg";
 import mainHeader from "./../../../assets/modals/visualizer/main-header.json";
 import "./Visualizer.scss";
-import { Cytoscape } from "../../../visualizerpoc/cytoscape/Cytoscape.component";
 
 
 export const Visualizer: React.FC<RouteComponentProps<VisualizerRouteProps>> = (

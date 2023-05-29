@@ -1,15 +1,22 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import CytoscapeComponent from "react-cytoscapejs";
+import { ServiceFactory } from "../../factories/serviceFactory";
+import { StardustFeedClient } from "../../services/stardust/stardustFeedClient";
 
 
 /**
- *
- * @param min
- * @param max
+ * @param min minimum number
+ * @param max maximum number
+ * @returns number
  */
 const getRandomNumber = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-export const Cytoscape = () => {
+export const Cytoscape = ({ network }: {network: string}) => {
+  useEffect(() => {
+    const feedService = ServiceFactory.get<StardustFeedClient>(`feed-${network}`);
+  }, []);
+
+
   const data = useMemo(() => Array.from({ length: 5000 })
     .map((i, index: number) => ({ grabbable: false,
       data: {
