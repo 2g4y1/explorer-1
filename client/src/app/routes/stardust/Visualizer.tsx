@@ -3,7 +3,6 @@ import { CONFLICT_REASON_STRINGS, ConflictReason } from "@iota/iota.js-stardust"
 import { Converter } from "@iota/util.js-stardust";
 import classNames from "classnames";
 import React, { useMemo, useContext, useRef, useState } from "react";
-import CytoscapeComponent from "react-cytoscapejs";
 import { Link, RouteComponentProps } from "react-router-dom";
 import { ReactComponent as CloseIcon } from "../../../assets/close.svg";
 import { DateHelper } from "../../../helpers/dateHelper";
@@ -21,13 +20,8 @@ import { VisualizerRouteProps } from "../VisualizerRouteProps";
 import { ReactComponent as DropdownIcon } from "./../../../assets/dropdown-arrow.svg";
 import mainHeader from "./../../../assets/modals/visualizer/main-header.json";
 import "./Visualizer.scss";
+import { Cytoscape } from "../../../visualizerpoc/cytoscape/Cytoscape.component";
 
-/**
- *
- * @param min
- * @param max
- */
-const getRandomNumber = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
 export const Visualizer: React.FC<RouteComponentProps<VisualizerRouteProps>> = (
     { match: { params: { network } } }
@@ -72,7 +66,6 @@ export const Visualizer: React.FC<RouteComponentProps<VisualizerRouteProps>> = (
     );
     const properties = selectedFeedItem?.properties;
 
-    const data = useMemo(() => Array.from({ length: 5000 }).map((i, index: number) => ({ grabbable: false, data: { id: index, label: `Node ${index}` }, position: { x: (index * 5), y: getRandomNumber(1, 400) } })), []);
 
     return (
         <div className="visualizer-stardust">
@@ -95,26 +88,18 @@ export const Visualizer: React.FC<RouteComponentProps<VisualizerRouteProps>> = (
                 </div>
             </div>
 
-            <CytoscapeComponent
-                // @ts-expect-error because
-                style={{ height: 500, width: 1000 }} elements={[
-                ...data
-                // { data: { id: "two", label: "Node 2" }, position: { x: 150, y: 300 } },
-                // { data: { source: "one", target: "two", label: "Edge from Node1 to Node2" } }
-            ]}
-                autoungrabify={false}
-            />
+            <Cytoscape />
             <div className="graph-border">
 
-                {/* <div*/}
-                {/*    className="viva"*/}
-                {/*    onClick={() => {*/}
-                {/*        if (lastClick && Date.now() - lastClick > 300) {*/}
-                {/*            selectNode();*/}
-                {/*        }*/}
-                {/*    }}*/}
-                {/*    ref={graphElement}*/}
-                {/* />*/}
+                <div
+                    className="viva"
+                    onClick={() => {
+                       if (lastClick && Date.now() - lastClick > 300) {
+                           selectNode();
+                       }
+                   }}
+                    ref={graphElement}
+                />
 
                 <div className="action-panel-container">
                     <div className="card">
