@@ -2,7 +2,7 @@
 import { CONFLICT_REASON_STRINGS, ConflictReason } from "@iota/iota.js-stardust";
 import { Converter } from "@iota/util.js-stardust";
 import classNames from "classnames";
-import React, { useContext, useRef, useState } from "react";
+import React, { useMemo, useContext, useRef, useState } from "react";
 import CytoscapeComponent from "react-cytoscapejs";
 import { Link, RouteComponentProps } from "react-router-dom";
 import { ReactComponent as CloseIcon } from "../../../assets/close.svg";
@@ -21,6 +21,13 @@ import { VisualizerRouteProps } from "../VisualizerRouteProps";
 import { ReactComponent as DropdownIcon } from "./../../../assets/dropdown-arrow.svg";
 import mainHeader from "./../../../assets/modals/visualizer/main-header.json";
 import "./Visualizer.scss";
+
+/**
+ *
+ * @param min
+ * @param max
+ */
+const getRandomNumber = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
 export const Visualizer: React.FC<RouteComponentProps<VisualizerRouteProps>> = (
     { match: { params: { network } } }
@@ -65,6 +72,8 @@ export const Visualizer: React.FC<RouteComponentProps<VisualizerRouteProps>> = (
     );
     const properties = selectedFeedItem?.properties;
 
+    const data = useMemo(() => Array.from({ length: 5000 }).map((i, index: number) => ({ grabbable: false, data: { id: index, label: `Node ${index}` }, position: { x: (index * 5), y: getRandomNumber(1, 400) } })), []);
+
     return (
         <div className="visualizer-stardust">
             <div className="row middle">
@@ -87,11 +96,13 @@ export const Visualizer: React.FC<RouteComponentProps<VisualizerRouteProps>> = (
             </div>
 
             <CytoscapeComponent
+                // @ts-expect-error because
                 style={{ height: 500, width: 1000 }} elements={[
-                { data: { id: "one", label: "Node 1" }, position: { x: 100, y: 400 } },
-                { data: { id: "two", label: "Node 2" }, position: { x: 150, y: 300 } },
-                { data: { source: "one", target: "two", label: "Edge from Node1 to Node2" } }
+                ...data
+                // { data: { id: "two", label: "Node 2" }, position: { x: 150, y: 300 } },
+                // { data: { source: "one", target: "two", label: "Edge from Node1 to Node2" } }
             ]}
+                autoungrabify={false}
             />
             <div className="graph-border">
 
