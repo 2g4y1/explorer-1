@@ -2,7 +2,7 @@
 // @ts-nocheck
 
 import * as d3 from "d3";
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useReducer } from "react";
 import { ServiceFactory } from "../../factories/serviceFactory";
 import { IFeedBlockData } from "../../models/api/stardust/feed/IFeedBlockData";
 import { IFeedBlockMetadata } from "../../models/api/stardust/feed/IFeedBlockMetadata";
@@ -18,65 +18,117 @@ interface Node {
 }
 
 
+const initialState = {
+  nodes: [],
+  nodesCoordinates: {}
+};
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case "addNode":
+      return {
+        nodes: [...state.nodes, action.payload.node],
+        nodesCoordinates: {
+          ...state.nodesCoordinates,
+          [action.payload.node.blockId]: action.payload.coordinates
+        }
+      };
+    default:
+      return state;
+  }
+};
+
 export const D3Pnt = ({ network }: {network: string}) => {
   const graphElement = useRef<HTMLCanvasElement>(null);
-  const [nodes, setNodes] = useState([]);
+  const [state, setState] = useState(initialState);
+  // const [nodes, setNodes] = useState([]);
   // const [nodesCoordinates, setNodesCoordinates] = useState({});
+  // const [nodesCount, setNodesCount] = useState(0);
+  // const [nodesCoordinates, setNodesCoordinates] = useState({});
+
+
+  const onNewBlockData = (newBlock: IFeedBlockData) => {
+    setState(prevState => {
+      const newNode = {
+        ...newBlock,
+        x: prevState.nodes.length * 5,
+        y: getRandomNumber(50, 350)
+      };
+
+      const updatedNodes = [...prevState.nodes, newNode];
+      const updatedNodesCoordinates = {
+        ...prevState.nodesCoordinates,
+        [newNode.blockId]: { x: newNode.x, y: newNode.y }
+      };
+
+      return {
+        nodes: updatedNodes,
+        nodesCoordinates: updatedNodesCoordinates
+      };
+    });
+
+    // // @ts-expect-error bec
+    // setNodes(prevNodes =>
+    //   // const newNode = {
+    //   //   ...newBlock,
+    //   //   x: prevNodes.length * 5,
+    //   //   y: getRandomNumber(50, 350),
+    //   // };
+    //   [...prevNodes, newBlock]
+    // );
+    //
+    // setNodesCoordinates(prevCoordinates => ({
+    //   ...prevCoordinates,
+    //   [newBlock.blockId]: {
+    //     x: prevNodes.length * 5,
+    //     y: getRandomNumber(50, 350)
+    //   }
+    // }));
+
+    // setNodesCoordinates();
+    // console.log("---", newBlock);
+    // if (graph.current) {
+    //   const now = Date.now();
+    //   lastUpdateTime.current = now;
+    //   console.log("---", newBlock);
+    //   const blockId = newBlock.blockId;
+    //   const existingNode = graph.current.getNode(blockId);
+    //
+    //   if (!existingNode) {
+    //     graph.current.addNode(blockId, {
+    //       feedItem: newBlock,
+    //       added: now
+    //     });
+    //
+    //     existingIds.current.push(blockId);
+    //
+    //     if (newBlock.parents) {
+    //       const addedParents: string[] = [];
+    //       for (let i = 0; i < newBlock.parents.length; i++) {
+    //         const parentId = newBlock.parents[i];
+    //         if (!addedParents.includes(parentId)) {
+    //           addedParents.push(parentId);
+    //           if (!graph.current.getNode(parentId)) {
+    //             graph.current.addNode(parentId);
+    //             existingIds.current.push(parentId);
+    //           }
+    //
+    //           graph.current.addLink(parentId, blockId);
+    //         }
+    //       }
+    //     }
+    //
+    //     setItemCount(existingIds.current.length);
+    //   }
+    //
+    //   checkLimit();
+    // }
+  };
+
   useEffect(() => {
     const feedService = ServiceFactory.get<StardustFeedClient>(`feed-${network}`);
 
-    if (feedService &&
-      graphElement.current
-    ) {
-      const onNewBlockData = (newBlock: IFeedBlockData) => {
-        // @ts-expect-error bec
-        setNodes(p => {
-          const index = p.length;
-          return [
-...p, { ...newBlock, x: (index * 5),
-            y: getRandomNumber(50, 350) }
-];
-        });
-        // setNodesCoordinates();
-        // console.log("---", newBlock);
-        // if (graph.current) {
-        //   const now = Date.now();
-        //   lastUpdateTime.current = now;
-        //   console.log("---", newBlock);
-        //   const blockId = newBlock.blockId;
-        //   const existingNode = graph.current.getNode(blockId);
-        //
-        //   if (!existingNode) {
-        //     graph.current.addNode(blockId, {
-        //       feedItem: newBlock,
-        //       added: now
-        //     });
-        //
-        //     existingIds.current.push(blockId);
-        //
-        //     if (newBlock.parents) {
-        //       const addedParents: string[] = [];
-        //       for (let i = 0; i < newBlock.parents.length; i++) {
-        //         const parentId = newBlock.parents[i];
-        //         if (!addedParents.includes(parentId)) {
-        //           addedParents.push(parentId);
-        //           if (!graph.current.getNode(parentId)) {
-        //             graph.current.addNode(parentId);
-        //             existingIds.current.push(parentId);
-        //           }
-        //
-        //           graph.current.addLink(parentId, blockId);
-        //         }
-        //       }
-        //     }
-        //
-        //     setItemCount(existingIds.current.length);
-        //   }
-        //
-        //   checkLimit();
-        // }
-      };
-
+    if (feedService && graphElement.current) {
       const onMetaDataUpdated = (updatedMetadata: { [id: string]: IFeedBlockMetadata }) => {
         // lastUpdateTime.current = Date.now();
         // if (graph.current) {
@@ -107,7 +159,19 @@ export const D3Pnt = ({ network }: {network: string}) => {
     };
   }, [network, graphElement.current]);
 
-  return (<NetworkChart nodes={nodes} links={[]} canvasRef={graphElement} />);
+  const links = useMemo(() => {
+    const resLinks = [];
+    for (const node of state.nodes) {
+      if (node.parents) {
+        for (const parent of node.parents) {
+          resLinks.push({ sourceId: node.blockId, targetId: parent });
+        }
+      }
+    }
+    return resLinks;
+  }, [state.nodes]);
+
+  return (<NetworkChart nodes={state.nodes} links={links} coordinates={state.nodesCoordinates} canvasRef={graphElement} />);
 };
 
 interface Node {
@@ -120,8 +184,8 @@ interface Node {
 }
 
 interface Link {
-  source: number;
-  target: number;
+  sourceId: number;
+  targetId: number;
 }
 
 interface NetworkChartProps {
@@ -130,7 +194,7 @@ interface NetworkChartProps {
   canvasRef: React.RefObject<HTMLCanvasElement> | React.MutableRefObject<HTMLCanvasElement>;
 }
 // eslint-disable-next-line react/no-multi-comp
-const NetworkChart: React.FC<NetworkChartProps> = ({ nodes: nodesBefore, links, canvasRef }) => {
+const NetworkChart: React.FC<NetworkChartProps> = ({ nodes: nodesBefore, links, coordinates, canvasRef }) => {
   const nodes = useMemo(() => nodesBefore.map((i, index) => ({ ...i })), [nodesBefore]);
 
   useEffect(() => {
@@ -152,10 +216,14 @@ const NetworkChart: React.FC<NetworkChartProps> = ({ nodes: nodesBefore, links, 
         bufferContext.clearRect(0, 0, width, height);
 
         for (const link of links) {
-          const { source, target } = link;
-          const sourceNode = nodes[source];
-          const targetNode = nodes[target];
+          const { sourceId, targetId } = link;
 
+          const sourceNode = coordinates[sourceId];
+          const targetNode = coordinates[targetId];
+
+          if (!sourceNode || !targetNode) {
+continue;
+}
           bufferContext.beginPath();
           bufferContext.moveTo(sourceNode.x, sourceNode.y);
           bufferContext.lineTo(targetNode.x, targetNode.y);
@@ -166,7 +234,8 @@ const NetworkChart: React.FC<NetworkChartProps> = ({ nodes: nodesBefore, links, 
 
         for (const node of nodes) {
           bufferContext.beginPath();
-          bufferContext.arc(node.x, node.y, 10, 0, 2 * Math.PI);
+          const nodeCoordinates = coordinates[node.blockId];
+          bufferContext.arc(nodeCoordinates.x, nodeCoordinates.y, 5, 0, 2 * Math.PI);
           bufferContext.fillStyle = "steelblue";
           bufferContext.fill();
         }
