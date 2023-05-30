@@ -100,6 +100,7 @@ export function useVisualizerState(network: string, graphElement: React.MutableR
     }, [graphElement, network, resetCounter.current]);
 
     useEffect(() => {
+        return;
         const feedService = ServiceFactory.get<StardustFeedClient>(`feed-${network}`);
 
         if (feedService && graph.current) {
@@ -107,7 +108,7 @@ export function useVisualizerState(network: string, graphElement: React.MutableR
                 if (graph.current) {
                     const now = Date.now();
                     lastUpdateTime.current = now;
-
+                    // console.log("---", newBlock);
                     const blockId = newBlock.blockId;
                     const existingNode = graph.current.getNode(blockId);
 

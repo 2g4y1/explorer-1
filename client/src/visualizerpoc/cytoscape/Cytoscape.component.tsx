@@ -13,6 +13,7 @@ const getRandomNumber = (min: number, max: number) => Math.floor(Math.random() *
 
 export const Cytoscape = ({ network }: {network: string}) => {
   useEffect(() => {
+    return;
     const feedService = ServiceFactory.get<StardustFeedClient>(`feed-${network}`);
   }, []);
 

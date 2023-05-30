@@ -20,6 +20,7 @@ import { VisualizerRouteProps } from "../VisualizerRouteProps";
 import { ReactComponent as DropdownIcon } from "./../../../assets/dropdown-arrow.svg";
 import mainHeader from "./../../../assets/modals/visualizer/main-header.json";
 import "./Visualizer.scss";
+import { D3Pnt } from "../../../visualizerpoc/d3-pnt/D3Pnt";
 
 
 export const Visualizer: React.FC<RouteComponentProps<VisualizerRouteProps>> = (
@@ -87,7 +88,9 @@ export const Visualizer: React.FC<RouteComponentProps<VisualizerRouteProps>> = (
                 </div>
             </div>
 
-            <Cytoscape />
+            {/* <Cytoscape network={network} /> */}
+
+            <D3Pnt network={network} />
             <div className="graph-border">
 
                 <div
