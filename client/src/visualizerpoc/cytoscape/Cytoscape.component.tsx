@@ -9,7 +9,7 @@ import { StardustFeedClient } from "../../services/stardust/stardustFeedClient";
  * @param max maximum number
  * @returns number
  */
-const getRandomNumber = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
+export const getRandomNumber = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
 export const Cytoscape = ({ network }: {network: string}) => {
   useEffect(() => {

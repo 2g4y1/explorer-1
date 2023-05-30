@@ -2,12 +2,12 @@
 // @ts-nocheck
 
 import * as d3 from "d3";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { ServiceFactory } from "../../factories/serviceFactory";
 import { IFeedBlockData } from "../../models/api/stardust/feed/IFeedBlockData";
 import { IFeedBlockMetadata } from "../../models/api/stardust/feed/IFeedBlockMetadata";
 import { StardustFeedClient } from "../../services/stardust/stardustFeedClient";
-
+import { getRandomNumber } from "../cytoscape/Cytoscape.component";
 interface Node {
   blockId: string;
   parents: string[];
@@ -21,6 +21,7 @@ interface Node {
 export const D3Pnt = ({ network }: {network: string}) => {
   const graphElement = useRef<HTMLCanvasElement>(null);
   const [nodes, setNodes] = useState([]);
+  // const [nodesCoordinates, setNodesCoordinates] = useState({});
   useEffect(() => {
     const feedService = ServiceFactory.get<StardustFeedClient>(`feed-${network}`);
 
@@ -29,7 +30,14 @@ export const D3Pnt = ({ network }: {network: string}) => {
     ) {
       const onNewBlockData = (newBlock: IFeedBlockData) => {
         // @ts-expect-error bec
-        setNodes(p => ([...p, newBlock]));
+        setNodes(p => {
+          const index = p.length;
+          return [
+...p, { ...newBlock, x: (index * 5),
+            y: getRandomNumber(50, 350) }
+];
+        });
+        // setNodesCoordinates();
         // console.log("---", newBlock);
         // if (graph.current) {
         //   const now = Date.now();
@@ -99,7 +107,7 @@ export const D3Pnt = ({ network }: {network: string}) => {
     };
   }, [network, graphElement.current]);
 
-  return (<canvas ref={graphElement} width={600} height={400} />);
+  return (<NetworkChart nodes={nodes} links={[]} canvasRef={graphElement} />);
 };
 
 interface Node {
@@ -122,70 +130,49 @@ interface NetworkChartProps {
   canvasRef: React.RefObject<HTMLCanvasElement> | React.MutableRefObject<HTMLCanvasElement>;
 }
 // eslint-disable-next-line react/no-multi-comp
-const NetworkChart: React.FC<NetworkChartProps> = ({ links, canvasRef }) => {
-  const nodes = [
-    {
-      "blockId": "0x7fb00839b23a6b3d4aee12bc0a4a58a4549a20a3866d625a4fbea7684ae7b6fb",
-      "parents": [
-        "0x69a4c66188a38d91f9728c10204368dcbddc30f103c91316a729b4b8eb770583",
-        "0x72629fc952c8749bbf6128e44d6ce5f5fa6610338643fad8a33690eb519d6e99",
-        "0xc6dd6a4a8f86decc7bf9b9768458d330a3e87e4de18ac17514542262b36db8be",
-        "0xcf07b443729ad62b4cf28ccd80f0379fa27d7df52b8143af404c625bd15d4b51"
-      ],
-      "properties": {
-        "tag": "0x484f524e4554205370616d6d6572"
-      },
-      "payloadType": "TaggedData",
-      x: 0,
-      y: 0
-    }
-];
+const NetworkChart: React.FC<NetworkChartProps> = ({ nodes: nodesBefore, links, canvasRef }) => {
+  const nodes = useMemo(() => nodesBefore.map((i, index) => ({ ...i })), [nodesBefore]);
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const canvas = canvasRef.current;
-    if (!canvas) {
-      return;
-    }
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const canvas = canvasRef.current!;
     const context = canvas.getContext("2d")!;
+
+    const bufferCanvas = document.createElement("canvas");
+    bufferCanvas.width = canvas.width;
+    bufferCanvas.height = canvas.height;
+    const bufferContext = bufferCanvas.getContext("2d")!;
 
     const width = canvas.width;
     const height = canvas.height;
-
-    context.clearRect(0, 0, width, height);
 
     const simulation = {
       nodes,
       links,
       tick() {
-        // context.clearRect(0, 0, width, height);
+        bufferContext.clearRect(0, 0, width, height);
 
         for (const link of links) {
           const { source, target } = link;
           const sourceNode = nodes[source];
           const targetNode = nodes[target];
 
-          context.beginPath();
-          // @ts-expect-error base
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-          context.moveTo(sourceNode.x, sourceNode.y);
-          // @ts-expect-error base
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-          context.lineTo(targetNode.x, targetNode.y);
-          context.strokeStyle = "black";
-          context.lineWidth = 1;
-          context.stroke();
+          bufferContext.beginPath();
+          bufferContext.moveTo(sourceNode.x, sourceNode.y);
+          bufferContext.lineTo(targetNode.x, targetNode.y);
+          bufferContext.strokeStyle = "black";
+          bufferContext.lineWidth = 1;
+          bufferContext.stroke();
         }
 
         for (const node of nodes) {
-          context.beginPath();
-          // @ts-expect-error base
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-          context.arc(node.x, node.y, 10, 0, 2 * Math.PI);
-          context.fillStyle = "steelblue";
-          context.fill();
+          bufferContext.beginPath();
+          bufferContext.arc(node.x, node.y, 10, 0, 2 * Math.PI);
+          bufferContext.fillStyle = "steelblue";
+          bufferContext.fill();
         }
+
+        context.clearRect(0, 0, width, height);
+        context.drawImage(bufferCanvas, 0, 0);
       }
     };
 
