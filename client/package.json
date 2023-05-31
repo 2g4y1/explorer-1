@@ -69,6 +69,7 @@
         "@svgr/webpack": "^6.3.1",
         "@types/bluebird": "^3.5.36",
         "@types/classnames": "^2.3.1",
+        "@types/d3": "^7.4.0",
         "@types/d3-array": "^3.0.3",
         "@types/d3-axis": "^3.0.1",
         "@types/d3-brush": "^3.0.2",

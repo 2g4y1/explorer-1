@@ -532,7 +532,7 @@ module.exports = {
             }
         ],
         "indent": [
-            "off"
+            "warn", 4
         ],
         "init-declarations": [
             "off"

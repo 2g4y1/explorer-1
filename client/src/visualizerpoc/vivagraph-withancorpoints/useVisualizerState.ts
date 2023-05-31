@@ -39,17 +39,17 @@ export function useVisualizerStateVivaWithAncorsPoc(
     network: string,
     graphElement: React.MutableRefObject<HTMLDivElement | null>
 ): [
-        (() => void),
-        ((node?: Viva.Graph.INode<INodeData, unknown>) => void),
-        string,
-        React.Dispatch<React.SetStateAction<string>>,
-        boolean,
-        number,
-        (IFeedBlockData | null),
-        (boolean | null),
-        React.Dispatch<React.SetStateAction<boolean | null>>,
+    (() => void),
+    ((node?: Viva.Graph.INode<INodeData, unknown>) => void),
+    string,
+    React.Dispatch<React.SetStateAction<string>>,
+    boolean,
+    number,
+    (IFeedBlockData | null),
+    (boolean | null),
+    React.Dispatch<React.SetStateAction<boolean | null>>,
         number | null
-    ] {
+] {
     const [settingsService] = useState<SettingsService>(ServiceFactory.get<SettingsService>("settings"));
     const [darkMode, setDarkMode] = useState<boolean | null>(
         settingsService.get().darkMode ?? null
@@ -609,6 +609,9 @@ export function useVisualizerStateVivaWithAncorsPoc(
         });
     }
 
+    /**
+     *
+     */
     function styleAncors(): void {
         for (const ancorId of [ANCOR_TOP_1, ANCOR_TOP_2, ANCOR_TOP_3, ANCOR_BOTTOM_1, ANCOR_BOTTOM_2, ANCOR_BOTTOM_3]) {
             const node = graph.current?.getNode(ancorId);
