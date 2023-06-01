@@ -88,8 +88,7 @@ export function useVisualizerViva(
 
             graphics.current.setNodeProgram(buildNodeShader());
 
-            graphics.current.node(node => calculateNodeStyle(
-                node, testForHighlight(highlightNodesRegEx(), node.id, node.data)));
+            graphics.current.node(node => calculateNodeStyle(node, testForHighlight(highlightNodesRegEx(), node.id, node.data)));
 
             // @ts-expect-error nonono
             graphics.current.graphCenterChanged(5, 20);
@@ -115,12 +114,25 @@ export function useVisualizerViva(
                 }
             });
 
+
             renderer.current = Viva.Graph.View.renderer<INodeData, unknown>(graph.current, {
                 container: graphElement.current,
-                graphics: graphics.current,
-                // @ts-expect-error wrong type
+                graphics: graphics.current, // @ts-expect-error wrong type
                 layout,
                 renderLinks: true
+            });
+
+            renderer.current.on("scale", ar => {
+                if (ar < 0.1) {
+                    // graphics.current?.scale(0.05, { x: transformation?.offset?.x as number, y:
+                    // transformation?.offset?.y as number }); @ts-expect-error
+                    renderer.current?.zoomIn();
+                }
+                if (ar > 1) {
+                    // graphics.current?.scale(0.05, { x: transformation?.offset?.x as number, y:
+                    // transformation?.offset?.y as number });
+                    renderer.current?.zoomOut();
+                }
             });
 
             renderer.current.run();
