@@ -1,4 +1,4 @@
-FROM node:16.20.2-bullseye
+FROM node:21.6.2-bullseye
 
 ## Include the build tools for any npm packages that rebuild
 RUN apt-get update && apt-get install -y \
