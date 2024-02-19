@@ -1,5 +1,5 @@
 # Use Debian-based Node 16 image
-FROM node:16
+FROM node:21.6.2
 
 # Update package lists and install dependencies
 RUN apt-get update && apt-get install -y \
